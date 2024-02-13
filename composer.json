@@ -5,7 +5,8 @@
     "homepage": "https://github.com/FMCorz/moodle-block_xp",
     "license": "GPL-3.0+",
     "require": {
-        "composer/installers": "*"
+        "composer/installers": "*",
+        "moodle/moodle": "^4.3"
     },
     "extra": {
         "installer-name": "xp"
@@ -13,5 +14,10 @@
     "support": {
         "issues": "https://github.com/FMCorz/moodle-block_xp/issues",
         "source": "https://github.com/FMCorz/moodle-block_xp"
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true
+        }
     }
 }

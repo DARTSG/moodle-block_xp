@@ -3,6 +3,20 @@ Level Up XP (block_xp) ![GitHub tag](https://img.shields.io/github/tag/FMCorz/mo
 
 Engage your students! A Moodle plugin to gamify your students' learning experience by allowing them to _level up_ in their courses.
 
+## DART additional notes
+
+To create a dev environment:
+
+- Install composer and php
+- Run `composer install` in the root directory
+- Install a php lsp (e.g. phpactor) to your editor
+- Run with docker-compose `docker compose --build .`
+- First initialization (only once) with `docker compose exec -it app moodle-plugin-ci install --plugin ./plugin --db-host=mariadb`
+- Run unit tests with `docker compose exec -it app moodle-plugin-ci phpunit`
+
+- Zip up the plugin using `npm run zip`
+- Use an additional bitnami moodle instance to test the plugin manually
+
 Features
 --------
 

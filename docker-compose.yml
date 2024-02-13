@@ -1,0 +1,39 @@
+# Copyright VMware, Inc.
+# SPDX-License-Identifier: APACHE-2.0
+
+version: '2'
+services:
+  app:
+    build:
+      context: .
+    environment:
+      DB: 'mariadb'
+      MOODLE_BRANCH: 'MOODLE_401_STABLE'
+      IGNORE_PATHS: 'vendor/,node_modules/,templates/level-badge.mustache'
+    ports:
+      - '8080:80'
+    volumes:
+      - '.:/var/www/html/moodle/blocks/xp'
+      - 'moodledata:/var/www/html/moodledata'
+      - 'moodle:/var/www/html/moodle'
+      - 'ci:/var/www/html/ci'
+  mariadb:
+    image: docker.io/bitnami/mariadb:11.2
+    environment:
+      MYSQL_USER: 'root'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+      MYSQL_CHARACTER_SET_SERVER: 'utf8mb4'
+      MYSQL_COLLATION_SERVER: 'utf8mb4_unicode_ci'
+      ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+      - 'mariadb_data:/bitnami/mariadb'
+
+volumes:
+  mariadb_data:
+    driver: local
+  moodledata:
+    driver: local
+  moodle:
+    driver: local
+  ci:
+    driver: local
