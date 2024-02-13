@@ -39,6 +39,7 @@
   },
   "scripts": {
     "dist": "NODE_ENV=production npx gulp dist",
-    "watch": "NODE_ENV=development npx gulp watch"
+    "watch": "NODE_ENV=development npx gulp watch",
+    "zip": "rm -f block_xp.zip && mkdir -p /tmp/block_xp && rsync -ah --progress . /tmp/block_xp && pushd /tmp && zip -r block_xp.zip --exclude=*.git* --exclude=*.DS_Store* --exclude=*node_modules* --exclude=*vendor* ./block_xp && rm -rf /tmp/block_xp && popd && mv /tmp/block_xp.zip ."
   }
 }
