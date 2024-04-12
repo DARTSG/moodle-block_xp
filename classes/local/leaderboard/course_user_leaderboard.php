@@ -70,6 +70,8 @@ class course_user_leaderboard implements leaderboard {
     protected $from;
     /** @var string SQL where. */
     protected $where;
+    /** @var string SQL group by. */
+    protected $groupby;
     /** @var string SQL order. */
     protected $order;
     /** @var array SQL params. */
@@ -91,7 +93,8 @@ class course_user_leaderboard implements leaderboard {
             $courseid,
             array $columns,
             ranker $ranker = null,
-            $groupid = 0) {
+            $groupid = 0,
+            $canseefullleaderboard = false) {
 
         $this->db = $db;
         $this->levelsinfo = $levelsinfo;
@@ -109,6 +112,27 @@ class course_user_leaderboard implements leaderboard {
             $params['groupid'] = $groupid;
         }
 
+        global $USER;
+        $usercohortids = $this->get_user_cohort_ids($db, $USER->id);
+        if ($canseefullleaderboard) {
+            // If the user can see the full leaderboard, we don't filter by cohort.
+            $cohortsql = '';
+        } else if (empty($usercohortids)) {
+            // If the user is not in any cohort, we don't show any user.
+            $cohortsql = "JOIN {cohort_members} cm ON cm.userid = x.userid AND cm.cohortid = 0";
+        } else {
+            // Only show users from the same cohort as the current user.
+            $placeholders = [];
+            foreach ($usercohortids as $index => $cohortid) {
+                $placeholderName = 'cohortid' . $index;
+                $placeholders[] = ':' . $placeholderName;
+                $params[$placeholderName] = $cohortid;
+            }
+            $cohortPlaceholders = implode(', ', $placeholders);
+
+            $cohortsql = "JOIN {cohort_members} cm ON cm.userid = x.userid AND cm.cohortid IN ($cohortPlaceholders)";
+        }
+
         // We rename the user ID from fields() to 'useridunused' because the xp table
         // already contains the user ID as 'userid and Oracle would complain if we select
         // the same field twice with the same alias.
@@ -117,17 +141,29 @@ class course_user_leaderboard implements leaderboard {
             context_helper::get_preload_record_columns_sql('ctx');
         $this->from = "{{$this->table}} x
                        $groupsql
+                       $cohortsql
                   JOIN {user} u
                     ON x.userid = u.id
                   JOIN {context} ctx
                     ON ctx.instanceid = u.id
                    AND ctx.contextlevel = :contextlevel";
         $this->where = "x.courseid = :courseid";
+        $this->groupby = 'x.userid';
         $this->order = "x.xp DESC, x.userid ASC";
         $this->params = $params + [
             'contextlevel' => CONTEXT_USER,
             'courseid' => $this->courseid,
         ];
+    }
+
+    protected function get_user_cohort_ids($db, $userid) {
+        $sql = 'SELECT c.id
+                  FROM {cohort} c
+                  JOIN {cohort_members} cm
+                    ON c.id = cm.cohortid
+                 WHERE cm.userid = ?
+                   AND c.visible = 1';
+        return $db->get_fieldset_sql($sql, [$userid]);
     }
 
     /**
@@ -159,9 +195,11 @@ class course_user_leaderboard implements leaderboard {
      */
     protected function get_points($id) {
         $sql = "SELECT x.xp
-                  FROM {$this->from}
-                 WHERE {$this->where}
-                   AND (x.userid = :userid)";
+                FROM {$this->from}
+                WHERE {$this->where}
+                    AND (x.userid = :userid)
+                GROUP BY {$this->groupby}";
+
         $params = $this->params + ['userid' => $id];
         return $this->db->get_field_sql($sql, $params);
     }
@@ -285,9 +323,10 @@ class course_user_leaderboard implements leaderboard {
      */
     protected function get_ranking_recordset(limit $limit) {
         $sql = "SELECT {$this->fields}
-                  FROM {$this->from}
-                 WHERE {$this->where}
-              ORDER BY {$this->order}";
+                FROM {$this->from}
+                WHERE {$this->where}
+                GROUP BY {$this->groupby}
+                ORDER BY {$this->order}";
         if ($limit) {
             $recordset = $this->db->get_recordset_sql($sql, $this->params, $limit->get_offset(), $limit->get_count());
         } else {
@@ -304,9 +343,10 @@ class course_user_leaderboard implements leaderboard {
      */
     protected function get_state($id) {
         $sql = "SELECT {$this->fields}
-                  FROM {$this->from}
-                 WHERE {$this->where}
-                   AND (x.userid = :userid)";
+                FROM {$this->from}
+                WHERE {$this->where}
+                AND (x.userid = :userid)
+                GROUP BY {$this->groupby}";
         $params = $this->params + ['userid' => $id];
         $record = $this->db->get_record_sql($sql, $params);
         return !$record ? null : $this->make_state_from_record($record);

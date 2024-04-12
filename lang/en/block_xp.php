@@ -607,6 +607,7 @@ $string['xp:addinstance'] = 'Add a new block';
 $string['xp:earnxp'] = 'Earning points';
 $string['xp:manage'] = 'Manage all aspects of experience points';
 $string['xp:myaddinstance'] = 'Add the block to my dashboard';
+$string['xp:seefullleaderboard'] = 'See all of the students from all cohorts in the leaderboard';
 $string['xp:view'] = 'View the block and its related pages';
 $string['xp:viewlogs'] = 'View the logs';
 $string['xp:viewreport'] = 'View the report';

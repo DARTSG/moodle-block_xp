@@ -57,6 +57,13 @@ $capabilities = [
         ],
     ],
 
+    // Whether or not a user can earn experience point.
+    'block/xp:seefullleaderboard' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes' => [],
+    ],
+
     // Whether or not the user can add the block on their dashboard.
     // We don't allow anyone to add it, the teacher/manager should add it
     // to their default dashboards.
