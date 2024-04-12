@@ -60,6 +60,16 @@ class context_permissions implements access_permissions, access_logs_permissions
     }
 
     /**
+     * Whether the user can see the full leaderboard (with students of all cohorts).
+     *
+     * @param int $userid The user ID.
+     * @return bool
+     */
+    public function can_see_full_leaderboard($userid = null): bool {
+        return has_capability('block/xp:seefullleaderboard', $this->context, $userid);
+    }
+
+    /**
      * Whether the user can access the logs.
      *
      * @param int $userid The user ID.

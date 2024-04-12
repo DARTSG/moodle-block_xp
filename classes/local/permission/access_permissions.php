@@ -51,6 +51,15 @@ interface access_permissions {
      */
     public function can_manage($userid = null);
 
+
+    /**
+     * Whether the user can see the full leaderboard (with students of all cohorts).
+     *
+     * @param int $userid The user ID.
+     * @return bool
+     */
+    public function can_see_full_leaderboard($userid = null);
+
     /**
      * Requires for user to be able to access the content.
      *

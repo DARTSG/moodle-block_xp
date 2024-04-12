@@ -210,7 +210,8 @@ class default_course_world_leaderboard_factory implements course_world_leaderboa
             $world->get_courseid(),
             $columns,
             $ranker,
-            $groupid
+            $groupid,
+            $world->get_access_permissions()->can_see_full_leaderboard()
         );
     }
 
